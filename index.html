@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anso Todo List</title>
+</head>
+
+<body>
+  <div class="container">
+    <div class="box todo">
+      <div class="header">
+        Todo
+      </div>
+      <div class="body">
+        <div class="item" draggable="true" data-id="1">Todo #1</div>
+        <div class="item" draggable="true" data-id="2">Todo #2</div>
+        <div class="item" draggable="true" data-id="3">Todo #3</div>
+        <div class="item" draggable="true" data-id="4">Todo #4</div>
+      </div>
+
+    </div>
+    <div class="box in-progress">
+      <div class="header">
+        In progress
+      </div>
+
+      <div class="body">
+
+      </div>
+    </div>
+    <div class="box done">
+      <div class="header">
+        Done
+      </div>
+      <div class="body">
+
+      </div>
+    </div>
+  </div>
+
+  <style>
+    body {
+      background-color: #1a1a1a;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-around;
+      /* border: 1px dotted red; */
+      margin: 30px 120px;
+    }
+
+    .box {
+      background-color: #212121;
+      /* min-height: 90vh; */
+      width: 200px;
+      transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .box .header {
+      font-size: 20px;
+      color: #fff;
+      line-height: 25px;
+      padding: 5px 10px;
+    }
+
+    .todo .header {
+      background-color: #2b85d3;
+    }
+
+    .in-progress .header {
+      background-color: #ee8b12;
+    }
+
+    .done .header {
+      background-color: #0d5d03;
+    }
+
+    .box .body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .box.drop {
+      border: 2px dashed #fff;
+    }
+
+    .box.drop .item {
+      pointer-events: none;
+    }
+
+    .box .item {
+      background-color: #303437;
+      color: #fff;
+      width: 80%;
+      min-height: 80px;
+      margin: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      transition: all .3s cubic-bezier(0.4, 0.0, 0.2, 1);
+      cursor: grab;
+    }
+
+    .selected {
+      transform: scale(0.8);
+      opacity: 0.5;
+    }
+
+    .item:active {
+      cursor: grabbing;
+    }
+  </style>
+
+  <script>
+    const boxes = document.querySelectorAll('.box');
+
+    let grabbing = false;
+
+    function onDragStart(e) {
+      this.classList.add('selected');
+
+      e.dataTransfer.setData('text/html', e.currentTarget.outerHTML);
+      e.dataTransfer.setData('text/plain', e.currentTarget.dataset.id);
+
+    }
+
+    function onDragEnd(e) {
+      console.log('fim');
+      this.classList.remove('selected');
+    }
+
+    function onDragEnter(e) {
+      this.classList.add('drop');
+
+    }
+
+    function onDragLeave(e) {
+      this.classList.remove('drop');
+    }
+
+    function onDrop(e) {
+      console.log('drop');
+
+      boxes.forEach(box => box.classList.remove('drop'));
+
+      const id = e.dataTransfer.getData('text/plain');
+
+      const cardOrigin = document.querySelector(`[data-id="${id}"]`);
+      cardOrigin.remove();
+
+      const data = e.dataTransfer.getData('text/html');
+
+      e.currentTarget.innerHTML = e.currentTarget.innerHTML + data;
+
+      initItems();
+    }
+
+    function onAllowDrop(e) {
+      e.preventDefault();
+    }
+
+    function initItems() {
+      let items = document.querySelectorAll('.item');
+
+      items.forEach(item => {
+        item.classList.remove('selected');
+
+        item.removeEventListener('dragstart', onDragStart);
+        item.removeEventListener('dragend', onDragEnd);
+
+        item.addEventListener('dragstart', onDragStart);
+        item.addEventListener('dragend', onDragEnd);
+      });
+
+    }
+
+    function initBoxes() {
+      boxes.forEach(box => {
+        box.addEventListener('dragenter', onDragEnter);
+        box.addEventListener('dragleave', onDragLeave);
+        box.addEventListener('drop', onDrop);
+        box.addEventListener('dragover', onAllowDrop);
+      })
+    }
+
+
+    initItems();
+    initBoxes();
+  </script>
+</body>
+
+</html>
